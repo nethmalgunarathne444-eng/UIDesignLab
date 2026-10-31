@@ -13,6 +13,9 @@ import android.media.ToneGenerator;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
+import android.content.Intent;
+import android.widget.EditText;
+
 
 
 public class MainActivity extends AppCompatActivity {
@@ -32,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate: Activity is being created");
         ConstraintLayout mainLayout = findViewById(R.id.mainLayout);
         Button btnSave = findViewById(R.id.btnSave);
+        EditText editUsername = findViewById(R.id.editUsername);
         btnSave.setBackgroundColor(COLOR_NORMAL);
 
         btnSave.setOnClickListener(v -> {
@@ -56,6 +60,15 @@ public class MainActivity extends AppCompatActivity {
             params.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID;
             params.topMargin = 48;
             mainLayout.addView(result, params);
+
+            String userName = editUsername.getText().toString().trim();
+            if (userName.isEmpty()) {
+                userName = "Student";
+            }
+            Intent intent = new Intent(MainActivity.this, DashboardActivity.class);
+            intent.putExtra("USER_NAME", userName); // data for the next screen
+            startActivity(intent);
+
         });
     }
 

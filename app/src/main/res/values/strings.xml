@@ -34,5 +34,7 @@
     <string name="file_none">No note file yet</string>
     <string name="menu_notes">My Notes</string>
 
+    <string name="menu_users">Users</string>
+
 
 </resources>

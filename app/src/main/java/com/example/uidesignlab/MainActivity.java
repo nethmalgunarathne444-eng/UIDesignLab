@@ -90,6 +90,18 @@ public class MainActivity extends AppCompatActivity {
             }
             editor.apply();
 
+            // 1. Make a final copy of the username for the background thread
+            final String nameToSave = userName;
+
+            // 2. Run the database insert on a background thread using ExecutorService
+            AppDatabase.databaseExecutor.execute(() -> {
+                long newId = AppDatabase.getInstance(getApplicationContext())
+                        .userDao()
+                        .insert(new UserRecord(nameToSave));
+
+                Log.d("RoomLab", "Inserted " + nameToSave + ", id = " + newId);
+            });
+
             Intent intent = new Intent(MainActivity.this, DashboardActivity.class);
             intent.putExtra("USER_NAME", userName); // data for the next screen
             startActivity(intent);

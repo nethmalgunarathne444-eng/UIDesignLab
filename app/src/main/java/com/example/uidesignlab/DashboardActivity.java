@@ -128,6 +128,12 @@ public class DashboardActivity extends AppCompatActivity
                     .show();
             return true;
         }
+        else if (id == R.id.action_users) {
+            // Launch UsersActivity when "Saved Users" is clicked
+            Intent intent = new Intent(DashboardActivity.this, UsersActivity.class);
+            startActivity(intent);
+            return true;
+        }
         else if (id == R.id.action_about) {
             new AlertDialog.Builder(this)
                     .setTitle("About")

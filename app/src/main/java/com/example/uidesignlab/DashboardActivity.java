@@ -21,7 +21,14 @@ import android.content.Intent;
 import android.net.Uri;
 import android.widget.Button;
 
-public class DashboardActivity extends AppCompatActivity {
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
+import androidx.fragment.app.Fragment;
+
+
+public class DashboardActivity extends AppCompatActivity
+        implements HeaderFragment.OnHeaderInteractionListener {
     private static final String TAG = "LifecycleTracker";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +69,15 @@ public class DashboardActivity extends AppCompatActivity {
                     Uri.parse("tel:0772102100"));
             startActivity(dielerIntent);
         });
+
+        // Add DetailFragment at runtime (only the first time)
+        if (savedInstanceState == null) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            DetailFragment detailFrag = new DetailFragment();
+            transaction.add(R.id.dynamic_fragment_container, detailFrag);
+            transaction.commit();
+        }
     }
 
     @Override
@@ -92,11 +108,54 @@ public class DashboardActivity extends AppCompatActivity {
                     .setPositiveButton("OK", (dialog, which) -> finish())
                     .show();
             return true;
+
+            //info fragment detail swapping lines
+        } else if (id == R.id.action_swap) {
+            Fragment current = getSupportFragmentManager()
+                    .findFragmentById(R.id.dynamic_fragment_container);
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            if (current instanceof DetailFragment) {
+                transaction.replace(R.id.dynamic_fragment_container, new InfoFragment());
+            } else {
+                transaction.replace(R.id.dynamic_fragment_container, new DetailFragment());
+            }
+            transaction.commit();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
-
         @Override
+        public void onButtonClicked(String data) {
+            // Receive data from HeaderFragment and pass it to DetailFragment
+            updateDetail(data);
+        }
+
+
+        public void onClearClicked() {
+            clearDetail();
+        }
+        private void updateDetail(String text) {
+            Fragment current = getSupportFragmentManager()
+                    .findFragmentById(R.id.dynamic_fragment_container);
+            if (current instanceof DetailFragment) {
+                ((DetailFragment) current).updateTextView(text);
+            } else {
+                Toast.makeText(this, "Detail area is not showing", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        private void clearDetail() {
+            Fragment current = getSupportFragmentManager()
+                    .findFragmentById(R.id.dynamic_fragment_container);
+
+            if (current instanceof DetailFragment) {
+                ((DetailFragment) current)
+                        .updateTextView("Detail area: no message yet");
+            }
+        }
+
+
+    @Override
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "Dashboard onResume");

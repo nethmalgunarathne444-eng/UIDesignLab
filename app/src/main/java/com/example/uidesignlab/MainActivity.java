@@ -15,6 +15,8 @@ import android.os.Looper;
 import android.widget.Toast;
 import android.content.Intent;
 import android.widget.EditText;
+import android.content.SharedPreferences;
+import android.widget.CheckBox;
 
 
 
@@ -23,6 +25,9 @@ public class MainActivity extends AppCompatActivity {
     static final int COLOR_NORMAL = Color.parseColor("#6200EE");
     private static final int COLOR_PRESSED = Color.parseColor("#FF9800");
     private ToneGenerator toneGenerator;
+    public static final String PREFS_NAME = "UserPrefs";
+    public static final String KEY_USERNAME = "username";
+    public static final String KEY_REMEMBER = "remember";
 
 
     @Override
@@ -36,6 +41,15 @@ public class MainActivity extends AppCompatActivity {
         ConstraintLayout mainLayout = findViewById(R.id.mainLayout);
         Button btnSave = findViewById(R.id.btnSave);
         EditText editUsername = findViewById(R.id.editUsername);
+        CheckBox chkRemember = findViewById(R.id.chkRemember);
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+
+        boolean remember = prefs.getBoolean(KEY_REMEMBER, false);
+        chkRemember.setChecked(remember);
+        if (remember) {
+            editUsername.setText(prefs.getString(KEY_USERNAME, ""));
+        }
+
         btnSave.setBackgroundColor(COLOR_NORMAL);
 
         btnSave.setOnClickListener(v -> {
@@ -65,6 +79,17 @@ public class MainActivity extends AppCompatActivity {
             if (userName.isEmpty()) {
                 userName = "Student";
             }
+
+            SharedPreferences.Editor editor = prefs.edit();
+            if (chkRemember.isChecked()) {
+                editor.putString(KEY_USERNAME, userName);
+                editor.putBoolean(KEY_REMEMBER, true);
+            } else {
+                editor.remove(KEY_USERNAME);
+                editor.putBoolean(KEY_REMEMBER, false);
+            }
+            editor.apply();
+
             Intent intent = new Intent(MainActivity.this, DashboardActivity.class);
             intent.putExtra("USER_NAME", userName); // data for the next screen
             startActivity(intent);

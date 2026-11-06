@@ -25,11 +25,15 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import androidx.fragment.app.Fragment;
+import android.content.SharedPreferences;
 
 
 public class DashboardActivity extends AppCompatActivity
         implements HeaderFragment.OnHeaderInteractionListener {
     private static final String TAG = "LifecycleTracker";
+    private static final String STORAGE_TAG = "StorageLab";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +43,17 @@ public class DashboardActivity extends AppCompatActivity
        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setTitle(R.string.dashboard_title);
+
+        if (savedInstanceState == null) {
+            SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+            int visits = prefs.getInt("visit_count", 0) + 1;
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putInt("visit_count", visits);
+            boolean saved = editor.commit();
+            Log.d(STORAGE_TAG, "Visit count saved: " + saved + " (" + visits + ")");
+            Toast.makeText(this, getString(R.string.visit_count, visits),
+                    Toast.LENGTH_SHORT).show();
+        }
 
         String userName = getIntent().getStringExtra("USER_NAME");
         TextView txtUserName = findViewById(R.id.txtUserName);
@@ -89,6 +104,12 @@ public class DashboardActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
+
+        if (id == R.id.action_notes) {
+            startActivity(new Intent(this, NotesActivity.class));
+            return true;
+        }
+
         if (id == R.id.action_settings) {
             Toast.makeText(this, "Settings clicked", Toast.LENGTH_SHORT).show();
             return true;
@@ -96,7 +117,13 @@ public class DashboardActivity extends AppCompatActivity
             new AlertDialog.Builder(this)
                     .setTitle("Logout")
                     .setMessage("Are you sure you want to log out?")
-                    .setPositiveButton("Yes", (dialog, which) -> finish())
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        getSharedPreferences(MainActivity.PREFS_NAME, MODE_PRIVATE)
+                                .edit()
+                                .clear()
+                                .apply();
+                        finish();
+                    })
                     .setNegativeButton("No", null)
                     .show();
             return true;
